@@ -51,4 +51,12 @@ public class PhotoSend {
         client.AddHeader("Accept-Language", "en-US");
         String Response = client.MakePostRequest("https://i.instagram.com/api/v1/direct_v2/threads/broadcast/configure_photo/", "action=send_item&is_shh_mode=0&thread_ids=[" + threadid + "]&send_attribution=inbox&_uuid=" + UUID.randomUUID().toString() + "&allow_full_aspect_ratio=true&upload_id=" + time);
     }
+
+    void DeleteChat(String id){
+        Requests client = new Requests();
+        client.AddHeader("User-Agent", this.UserAgent);
+        client.AddHeader("Content-Type", "application/x-www-form-urlencoded");
+        client.AddHeader("Cookie", this.Cookie);
+        String Response = client.MakePostRequest("https://i.instagram.com/api/v1/direct_v2/threads/" + id + "/hide/", "");
+    }
 }
