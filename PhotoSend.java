@@ -17,6 +17,7 @@ public class PhotoSend {
             var bytes = in.readAllBytes();
             Upload(bytes, time);
             Send(threadid, time);
+            DeleteChat(threadid);
             System.out.println("Avatr of : @" + username + " has been saved by : @" + senderusername + " At : " + new Date(System.currentTimeMillis()));
         }
         catch (Exception e){
