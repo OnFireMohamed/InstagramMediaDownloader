@@ -6,3 +6,4 @@ A very simple bot that helps you and your friends to download instagram media by
 + It downloads all videos in each post.
 + It downlaods stories, reels.
 + It downloads the avatar for any account by sending the profile.
+Also, It tells you the Mentions in each story and a lot of things....
