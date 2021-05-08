@@ -91,9 +91,7 @@ public class Main {
                         new VideoSend(logger.ApiCookie).Send(url, threadid, clientcontext, username);
                         if(itemtype.equals("story_share")){
                             var text = matcher.Unescape(matcher.Match(v1, "text\": \"<match>\"", false));
-                            System.out.println(text);
                             if (text != null || text != ""){
-                                System.out.println(text);
                                 var s = "The Mentions(text):\n\n" + text + "\n\n" + "برمجة : " ;
                                 SendMessage(userid, s + "\n@afph");
                             }
