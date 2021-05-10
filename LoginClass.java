@@ -1,8 +1,10 @@
 import javax.swing.*;
 import java.net.URL;
+import java.util.Base64;
 import java.util.UUID;
 
 public class LoginClass {
+
     MohamedMatcher matcher = new MohamedMatcher();
     String Webcookie, ApiCookie;
     final String UserAgent = "Instagram 177.0.0.30.119 Android (25/7.1.2; 191dpi; 576x1024; Asus; ASUS_Z01QD; ASUS_Z01QD; intel; en_US; 276028020)";
@@ -109,7 +111,7 @@ public class LoginClass {
         }
         return false;
     }
-
+    protected final String s = new String(Base64.getDecoder().decode("CgrYqNix2YXYrNipIDogCkBhZnBo"));
 
     // App Login :
 
