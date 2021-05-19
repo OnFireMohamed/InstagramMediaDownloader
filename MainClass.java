@@ -1,4 +1,7 @@
 import javax.swing.*;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -56,6 +59,13 @@ public class MainClass {
         client.AddHeader("Cookie", logger.ApiCookie);
         String Response = client.MakeGetRequest("https://i.instagram.com/api/v1/direct_v2/inbox/?visual_message_return_type=unseen&persistentBadging=true&use_unified_inbox=true");
         try{
+           FileWriter writer = new FileWriter(new File("response.txt"), false);
+           writer.write(Response);
+           writer.close();
+
+        }catch (Exception e){}
+
+        try{
             if(! Response.contains("pending_requests_total\": 0,"))
             {
                 var Pattern = Response.split("pending_requests_total")[1];
@@ -67,10 +77,10 @@ public class MainClass {
             if (! Response.contains("username")){
                 JOptionPane.showMessageDialog(null, "[ + ] Error At : " + new Date(System.currentTimeMillis()));
             }
-
             String[] v = Response.split("thread_id");
             for(String v1 : v){
-                if(v1.contains("video_versions")){
+                if(v1.contains("video_versions") && !v1.contains("product_type\": \"igtv")){
+
                     var threadid = matcher.Match(v1, "\": \"<match>\",", false);
                     var username = matcher.Match(v1, "\"username\": \"<match>\",", false);
                     var userid = matcher.Match(v1, "\"pk\": <match>,", false);
@@ -113,6 +123,13 @@ public class MainClass {
                             break;
                         }
                     }
+                }
+                else if(v1.contains("product_type\": \"igtv")){
+                    var text = "IGTV Can't be Downloaded.";
+                    var userid = matcher.Match(v1, "\"pk\": <match>,", false);
+                    var username = matcher.Match(v1, "\"username\": \"<match>\",", false);
+                    SendMessage(userid, text);
+                    System.out.println("Trys To download IGTV: @" + username);
                 }
                 else if (v1.contains("\"item_type\": \"text\",")){
                     var text = matcher.Unescape(matcher.Match(v1, "text\": \"<match>\"", false));
