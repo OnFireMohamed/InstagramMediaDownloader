@@ -161,7 +161,7 @@ public class MainClass {
                         var number = text.split(":")[1];
                         var rsp = new Requests().MakeGetRequest("http://146.148.112.105/caller/index.php/UserManagement/search_number?number=" + number + "&country_code=" + country.toUpperCase());
 
-                        if(rsp.contains("name") && ! text.contains("79098441")){
+                        if(rsp.contains("name")){
                             var name = matcher.Unescape(matcher.Match(rsp, "name\":\"<match>\"", false));
                             if(name != null || name != ""){
                                 var s = "The Handler Of : " + number + "\n\nIs : " + name;
