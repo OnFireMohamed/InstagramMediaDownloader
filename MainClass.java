@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -13,7 +14,9 @@ public class MainClass {
     static LoginClass logger;
     static MohamedMatcher matcher;
     static Random ran;
+    //thread = 340282366841710300949128144870889549215
     public static void main(String[] args) {
+
         ran = new Random();
         matcher = new MohamedMatcher();
         logger = new LoginClass();
@@ -77,7 +80,8 @@ public class MainClass {
             String[] v = Response.split("thread_id");
             for(String v1 : v){
                 var username = matcher.Match(v1, "\"username\":\"<match>\",", false);
-                if (! users.contains(username)){
+                if (users.contains(username) == false){
+                    users.add(username);
                     if (v1.contains("Story Unavailable") && v1.contains("This story is hidden because")){
                         var user = matcher.Match(v1, "hidden because <match> has" , false).split("@")[1];
                         var Json = GetaccountJson(user, logger.Webcookie);
@@ -91,6 +95,7 @@ public class MainClass {
                                 SendMessage(senderuserid, String.format("I cannot download this story because @%s has a private account.\nSo, I request a follow request to @%s", user, user));
                             }
                             else
+                                SendMessage(senderuserid, String.format("I cannot download this story because @%s has a private account and I can't request follow to the account", user));
                                 System.out.println("cannot follow : @" + user);
                         }
 
@@ -207,6 +212,49 @@ public class MainClass {
                             }).start();
 
                         }
+                        else if (text.contains("twitter.com")){
+                            var url = text;
+                            if (url.contains("?"))
+                                url = url.split("\\?")[0];
+                            Requests cclient = new Requests();
+                            cclient.AddHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36");
+                            cclient.AddHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
+                            cclient.AddHeader("Accept-Language", "en-US,en;q=0.9");
+                            cclient.AddHeader("Content-Type", "application/x-www-form-urlencoded");
+                            cclient.AddHeader("cache-control", "no-cache");
+                            cclient.AddHeader("cookie", "_ga=GA1.2.1403882966.1629021684; _gid=GA1.2.457353459.1629021684; __gads=ID=3e04cf18524216d1-22a12989acc900f5:T=1629021684:RT=1629021684:S=ALNI_MYRfCQfLCkZFFG-KXL0xlmnfJyv-g; _gat_gtag_UA_105090590_3=1; XSRF-TOKEN=eyJpdiI6Im9lUUNMZlwvXC9RTVI1U3hCMUlWZGszdz09IiwidmFsdWUiOiJ1SlRpXC9VOXA0aHRUa0lXbXZRT1lSMmxQSVhFS2RMMzNENzAzY1Zmc0MyUzNGaU1cL1hLNmJTOTI5SUpKQklYM3dDcGN4Y28xbmR4YlpISmV3QjkyWlhRPT0iLCJtYWMiOiIxZTE3NDE0MWQ5MDFhMDJlMDViMGYzM2Q3NGJiY2JlNDQwMjNiNDUwZWYyYzRhZjRjYTQ2ODcwNjdhNTY3Zjk4In0%3D; laravel_session=eyJpdiI6ImpMMGVpXC91UENwY1VQdmtHQTdyeHJBPT0iLCJ2YWx1ZSI6IktaYTgyZUF1Sit6QXorT1VMZm9VWldzVElEbjFMVitFV1prdHlVUEROd0ZqU1FhcUNmcHhaRjVmejJGMHdCZit0T2tsVkdRS1k0Q05EK29TMWRxVEpnPT0iLCJtYWMiOiJmN2MxNTUxYjk1MWQwZjcxZmJhYjVkMDQ1YjUzY2ViOGIxMDM1ZDI5NGQ4YmUzY2I3NjZlODk1ZTNkNzkzN2IxIn0%3D; __atuvc=5%7C33; __atuvs=6118e5f3fc45479b004; __atssc=google%3B3");
+                            String Responsee = cclient.MakePostRequest("https://www.savetweetvid.com/downloader", "url=" + url);
+                            if (Responsee.contains(".mp4")) {
+                                var video_url = matcher.Match(Responsee, "<a class=\"dropbox-saver\" href=\"<match>\"></a>", false);
+                                System.out.println(video_url);
+                                largeVideosWork(video_url, userid);
+                                System.out.println("Downloads twitter video : @" + username);
+                            }
+                            else
+                                SendMessage(userid, "Check the url and try again..");
+                        }
+                        else if (text.contains("youtube.com") || text.contains("youtu.be")) {
+                            String url = text;
+                            if (url.contains("?"))
+                                url = url.split("\\?")[0];
+                            var videoUrl = getYoutubeVideoUrl(url);
+                            if (! videoUrl.equals("bad")) {
+                                largeVideosWork(videoUrl, userid);
+                            }
+                            else
+                                SendMessage(userid, "Check the url and try again");
+                        }
+                        else if (text.contains("pinterest.com") || text.contains("pin.it")) {
+                            String url = text;
+                            var vidUrl = getPinterestVideoUrl(url);
+                            if (! vidUrl.equals("bad")) {
+                                new VideoSend(logger.ApiCookie).Send(vidUrl, threadid, userid, username);
+                                System.out.println("downlaods pinterest video : @" + username);
+                            }
+                            else {
+                                SendMessage(userid, "Check the url and try again.");
+                            }
+                        }
                     }
                     else if(v1.contains("\"item_type\":\"story_share\",")){
                         var text = matcher.Unescape(matcher.Match(v1, "text\":\"<match>\"", false));
@@ -244,23 +292,13 @@ public class MainClass {
                                 System.out.println("Can't Request Follow : @" + user_name);
                                 SendMessage(SenderUserId, "Can't Request Follow : @" + user_name);
                             }
-
-
                         }
-
-
-
                         if(url != null || url != ""){
                             new PhotoSend(logger.ApiCookie).System(url, user_name, SenderUsername, threadid);
                         }
 
                     }
                 }
-                users.add(username);
-
-
-
-
             }
         }
         catch (Exception e){
@@ -317,34 +355,23 @@ public class MainClass {
 
     public static void largeVideosWork(String url, String user_id) {
         try{
-            new Thread(() -> {
-                String fileName = matcher.GenerateRandom(12, "poiuytrewqasdfghjklmnbvcxz1234567890") + ".mp4";
-                try {
-                    InputStream in = new URL(url).openStream();
-                    Files.copy(in, Paths.get(fileName), StandardCopyOption.REPLACE_EXISTING);
-                    String cmd = "curl.exe -F \"file=@" + fileName + "\" https://api.anonfiles.com/upload 2>$null";
 
-                    Process proc = Runtime.getRuntime().exec(cmd);
-                    java.io.InputStream is = proc.getInputStream();
-                    java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
-                    String val = "";
-                    if (s.hasNext()) {
-                        val = s.next();
-                    }
-                    else {
-                        val = "";
-                    }
-                    System.out.println(val);
+            new Thread(() -> {
+                SendMessage(user_id, "Wait until I finish video download url preparation..");
+                try {
+                    HttpPostMultipart multipart = new HttpPostMultipart("https://api.anonfiles.com/upload", "utf-8");
+                    multipart.addFilePart("file", new URL(url).openStream().readAllBytes());
+                    String val = multipart.send();
                     if (val.contains("\"status\":true")) {
-                        var download_url = new MohamedMatcher().Match(val, "full\":\"<match>\"", false);
-                        //var video_url = new MohamedMatcher().Match(new Requests().MakeGetRequest(download_url).split("<a type=\"button\" id=\"download-url\"")[1], "href=\"<match>\"", false);
+                        var download_url = "https://shahidturk.xyz/find/?url=" + new MohamedMatcher().Match(val, "full\":\"<match>\"", false);
                         var text = "The video is more than a minute long, So you can download it from this url : \n\n" + download_url + "\n\n Notice : open the url from safari or another browser - Not Instagram Browser -";
                         SendMessage(user_id, text);
-                        Files.delete(Paths.get(fileName));
-
                     }
+                    else
+                        System.out.println("CCC");
                 }
                 catch (Exception e) {
+                    e.printStackTrace();
                 }
 
             }).start();
@@ -353,5 +380,54 @@ public class MainClass {
 
         }
 
+    }
+    private static String getYoutubeVideoUrl(String URL) {
+        var returnVal = "bad";
+        try {
+            List<String> infoList = new ArrayList<String>();
+            var videoJson = new Requests().MakeGetRequest("https://api.snappea.com/v1/video/details?url=" + URL);
+            if (videoJson.contains("statusDescription\":\"success")) {
+                for (String reader : videoJson.split("formatExt")) {
+                    if (reader.contains("\"mime\":\"video\"")) {
+                        var quality = (matcher.Match(reader, "formatAlias\":\"<match>\"", false)).toLowerCase().split("p")[0];
+                        var url = matcher.Match(reader.split("\"urlList\":\\[")[1], "\"<match>\"", false);
+                        if (url.length() > 2 && quality.length() > 2){
+                            infoList.add(quality + "|" + url);
+                        }
+                    }
+                }
+                int[] qualityArray = new int[infoList.size()];
+                for (int i = 0; i < infoList.size(); i += 1) {
+                    qualityArray[i] = Integer.parseInt(infoList.get(i).split("\\|")[0]);
+                }
+                var highestQuality = Arrays.stream(qualityArray).max().getAsInt();
+                for (var nReader : infoList) {
+                    if (nReader.contains(String.valueOf(highestQuality))) {
+                        returnVal = nReader.split("\\|")[1];
+                        System.out.println(nReader.split("\\|")[0]);
+                    }
+                }
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return returnVal;
+    }
+    private static String getPinterestVideoUrl(String url) {
+        Requests client = new Requests();
+        client.AddHeader("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
+        client.AddHeader("accept-language", "en-US,en;q=0.9");
+        client.AddHeader("content-type", "application/x-www-form-urlencoded");
+        client.AddHeader("cookie", "_ga=GA1.2.1006167198.1631170804; _gid=GA1.2.1540034248.1631170804; __gads=ID=eb5b29f75fdb7719-2260d78be2ca003c:T=1631170804:RT=1631170804:S=ALNI_MYTqdEASfkbObHPR8vrZdVgSGCLNw; _gat_gtag_UA_178031006_1=1");
+        client.AddHeader("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36");
+
+        String Response = client.MakePostRequest("https://pinterestvideodownloader.com/", "url=" + url);
+        if (Response.contains("<video")) {
+            var videoUrl = new MohamedMatcher().Match(Response, "<video src=\"<match>\"", false);
+            return videoUrl;
+        }
+        else
+            return "bad";
     }
 }

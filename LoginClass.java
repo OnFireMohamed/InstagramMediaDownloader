@@ -31,6 +31,7 @@ public class LoginClass {
         client.AddHeader("Cookie", "mid=YPHJsgALAAE71a4OaVJd1h8k5VQn; ig_did=CBC4EDD6-2079-442E-8C6C-024F0FA5B46D; ig_nrcb=1; csrftoken=wXF2nLvlB6Ecna2AhxhgalmLvwc9Wkn3");
 
         String Response = client.MakePostRequest("https://www.instagram.com/accounts/login/ajax/", "username=" + user + "&enc_password=#PWD_INSTAGRAM_BROWSER:0:1619193893:" + pass + "&queryParams={}&optIntoOneTap=false");
+        System.out.println(Response);
         if (Response.contains("authenticated\":true")){
             String SetCookie = client.GetResponseHeader("set-cookie");
             Webcookie = "mid=YPHJsgALAAE71a4OaVJd1h8k5VQn; ig_did=CBC4EDD6-2079-442E-8C6C-024F0FA5B46D; ig_nrcb=1; csrftoken=wXF2nLvlB6Ecna2AhxhgalmLvwc9Wkn3; sessionid=" + SetCookie.split("sessionid=")[1].split(";")[0];
@@ -118,6 +119,7 @@ public class LoginClass {
         client.AddHeader("Accept-Language", "en-US,en;q=0.9");
         client.AddHeader("Cookie", this.ApiCookie);
         String Response = client.MakePostRequest("https://i.instagram.com/api/v1/accounts/login/", RBody);
+        System.out.println(Response);
         if(Response.contains("bad_password"))
             return false;
         else if(Response.contains("logged_in_user"))

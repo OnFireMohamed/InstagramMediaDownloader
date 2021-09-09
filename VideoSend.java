@@ -1,18 +1,21 @@
+import com.sun.tools.javac.Main;
+
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Date;
 import java.util.UUID;
 
 public class VideoSend {
-    private final String Cookie;
-    private final String _uid;
-
+    private final String Cookie, _uid;
+    private String url, userid;
     VideoSend(String Cookie){
         this._uid = new MohamedMatcher().GenerateRandom("46231100833".length(), "0987654321");
         this.Cookie = Cookie;
     }
 
     void Send(String url, String threadid, String userid, String Username){
+        this.url = url;
+        this.userid = userid;
         try{
             var time = "1619" + new MohamedMatcher().GenerateRandom(12, "0987654321");
             var uuid = UUID.randomUUID().toString();
@@ -70,6 +73,7 @@ public class VideoSend {
         client.AddHeader("X-FB-HTTP-Engine", "Liger");
 
         String Response = client.MakePostRequest("https://i.instagram.com/rupload_igvideo/" + uuid, videoBytes);
+
     }
 
     private void Upload2(String Time, String uuid){
@@ -105,5 +109,6 @@ public class VideoSend {
         else if (Response.contains("\"status\":\"ok\""))
             return true;
         return true;
+
     }
 }
