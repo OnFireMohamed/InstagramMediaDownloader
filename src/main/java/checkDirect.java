@@ -178,11 +178,14 @@ public class checkDirect {
                 url += "/";
             String finalUrl = url;
             new Thread(() -> {
-                var json = new Requests().MakeGetRequest("https://mohamed-node-apis.herokuapp.com/api/tiktok/?url=" + finalUrl);
-                if (json.contains("\"status\":\"ok\"")) {
-                    var video_url = matcher.Match(json, "without_water_mark\":\"<match>\"", false);
-                    new VideoSend(this.cookie).Send(URLDecoder.decode(video_url), thread_id, user_id, username);
-                    System.out.println("downloads tiktok video : @" + username);
+                var token = matcher.Match(new Requests().MakeGetRequest("https://tiktok-downloader.online/"), "<meta name=\"_token_\" content=\"<match>\">", false);
+                if (token != "" || ! token.equals("")) {
+                    Requests client = new Requests();
+                    client.AddHeader("token", token);
+                    var jUrl = new JSONObject(client.MakeGetRequest("https://tiktok-downloader.online/api/v1/fetch?url=" + finalUrl)).get("url_nwm");
+                    if (! jUrl.equals("")) {
+                        new VideoSend(this.cookie).Send(URLDecoder.decode(String.valueOf(jUrl)), thread_id, user_id, username);
+                    }
                 }
                 else {
                     MainClass.SendMessage(user_id, "Check the url and try again");
