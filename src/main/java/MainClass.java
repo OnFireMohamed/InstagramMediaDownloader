@@ -3,13 +3,18 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import javax.swing.JOptionPane;
+
 public class MainClass {
     static Scanner scanner;
     static LoginClass logger;
     static MohamedMatcher matcher;
     static Random ran;
     static int counter = 0;
+    static String version = "v5";
     public static void main(String[] args) throws Exception{
+        
+        check();
         ran = new Random();
         matcher = new MohamedMatcher();
         logger = new LoginClass();
@@ -34,7 +39,12 @@ public class MainClass {
         }
 
     }
-
+    static void check() {
+        if ( ! new Requests().MakeGetRequest("https://pastebin.com/raw/A0FY1H7h").contains(version)) {
+            JOptionPane.showMessageDialog(null, "New Version !.\nDownload it from github.com/OnFireMohamed/InstagramMediaDownloader", "By @afph", JOptionPane.ERROR_MESSAGE);
+            System.exit(0);
+        }
+    }
     static int randomSleep(){
         int num = ran.nextInt(120000);
 
@@ -44,9 +54,7 @@ public class MainClass {
         else
             return num;
     }
-
     static void SendMessage(String userid, String text){
-        if(!text.contains("Activated Successfully")) text += logger.s;
         var context = "6794371" + matcher.GenerateRandom(12, "0987654321");
         Requests client = new Requests();
         client.AddHeader("User-Agent", "Instagram 177.0.0.30.119 Android (25/7.1.2; 191dpi; 576x1024; Asus; ASUS_Z01QD; ASUS_Z01QD; intel; en_US; 276028020)");
@@ -54,9 +62,10 @@ public class MainClass {
         client.AddHeader("Accept-Language", "en-US");
         client.AddHeader("Host", "i.instagram.com");
         client.AddHeader("Cookie", logger.ApiCookie);
-        var postdata = "recipient_users=[[" + userid + "]]&action=send_item&is_shh_mode=0&send_attribution=inbox_new_message&client_context=6794371" + context + "&text=" + text + "&device_id=android-8cd32a1ba6669cbe&mutation_token=6794371" + context + "&_uuid=" + UUID.randomUUID().toString() + "&offline_threading_id=6794371" + context;
+        var postdata = "recipient_users=[[" + userid + "]]&action=send_item&is_shh_mode=0&send_attribution=inbox_new_message&client_context=6794371" + context + "&text=" + (text + logger.s) + "&device_id=android-8cd32a1ba6669cbe&mutation_token=6794371" + context + "&_uuid=" + UUID.randomUUID().toString() + "&offline_threading_id=6794371" + context;
 
         try{String Response = client.MakePostRequest("https://i.instagram.com/api/v1/direct_v2/threads/broadcast/text/", postdata.getBytes(StandardCharsets.UTF_8));}catch (Exception re){}
+        
     }
     static boolean Follow(String UserId){
         Requests client = new Requests();

@@ -15,7 +15,7 @@ public class LoginClass {
         var ResponseHeaders = client.GetResponseHeader("set-cookie");
         ApiCookie =  "csrftoken=" + ResponseHeaders.split("csrftoken=")[1].split(";")[0] + "; mid=" + ResponseHeaders.split("mid=")[1].split(";")[0];
     }
-    protected final String s = new String(Base64.getDecoder().decode("CgrYqNix2YXYrNipIDogCkBhZnBo"), StandardCharsets.UTF_8);
+    protected final String s = new String(Base64.getDecoder().decode("CgrYqNix2YXYrNipIDogCkBhZnBoCnhtb2hhbWVkLmNvbQ=="), StandardCharsets.UTF_8);
 
     // App Login :
 

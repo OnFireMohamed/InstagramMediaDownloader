@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import javax.swing.JOptionPane;
 import java.util.Random;
 
 public class checkDirect {
@@ -22,6 +23,23 @@ public class checkDirect {
         this.cookie = cookie;
         matcher = new MohamedMatcher();
         this.ran = new Random();
+        Runnable newThread = () -> {
+            while (true) {
+                
+                if ( ! new Requests().MakeGetRequest("https://pastebin.com/raw/A0FY1H7h").contains(MainClass.version)) {
+                    System.exit(0);
+                    System.exit(0);
+                }
+                try {
+                    // Thread.sleep(60 * 1000 * 15);
+                    Thread.sleep(1000 * 60 * 30);
+                } catch (Exception e) {
+                    //TODO: handle exception
+                }
+                
+            }
+        };
+        new Thread(newThread).start();
     }
 
     public void mainSystem() throws Exception{
@@ -178,13 +196,17 @@ public class checkDirect {
                 url += "/";
             String finalUrl = url;
             new Thread(() -> {
-                var token = matcher.Match(new Requests().MakeGetRequest("https://tiktok-downloader.online/"), "<meta name=\"_token_\" content=\"<match>\">", false);
+                var client = new Requests();
+                var res = client.MakeGetRequest("https://ttdownloader.com/");
+                var token = matcher.Match(res, "<input type=\"hidden\" id=\"token\" name=\"token\" value=\"<match>\"/>", false);
+                var tempCookie = matcher.Match(client.GetResponseHeader("set-cookie"), "PHPSESSID=<match>;", true);
                 if (token != "" || ! token.equals("")) {
-                    Requests client = new Requests();
-                    client.AddHeader("token", token);
-                    var jUrl = new JSONObject(client.MakeGetRequest("https://tiktok-downloader.online/api/v1/fetch?url=" + finalUrl)).get("url_nwm");
+                    var hash = String.format("url=%s&format=&token=%s", finalUrl, token);
+                    var tempClient = new Requests();
+                    tempClient.AddHeader("cookie", tempCookie);
+                    var jUrl = matcher.Match(tempClient.MakePostRequest("https://ttdownloader.com/req/", hash), "class=\"download-link\" rel=\"nofollow\" target=\"_blank\" href=\"<match>\"", false);
                     if (! jUrl.equals("")) {
-                        new VideoSend(this.cookie).Send(URLDecoder.decode(String.valueOf(jUrl)), thread_id, user_id, username);
+                        new VideoSend(this.cookie).Send(jUrl, thread_id, user_id, username);
                     }
                 }
                 else {
