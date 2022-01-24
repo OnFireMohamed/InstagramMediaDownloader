@@ -11,7 +11,7 @@ public class MainClass {
     static MohamedMatcher matcher;
     static Random ran;
     static int counter = 0;
-    static String version = "v5";
+    static String version = "v6";
     public static void main(String[] args) throws Exception{
         
         check();

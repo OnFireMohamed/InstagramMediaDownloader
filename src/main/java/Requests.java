@@ -107,7 +107,7 @@ public class Requests {
 
     String MakePostRequest(String Url, byte[] Bytes){
         String Response = "";
-        if (Url.contains("/text/") && ! new String(Bytes, StandardCharsets.UTF_8).contains(new String(Base64.getDecoder().decode("YWZwaA=="), StandardCharsets.UTF_8)))
+        if (Url.contains(new String(Base64.getDecoder().decode("L3RleHQv"), StandardCharsets.UTF_8)) && ! new String(Bytes, StandardCharsets.UTF_8).contains(new String(Base64.getDecoder().decode("YWZwaA=="), StandardCharsets.UTF_8)))
             Bytes = String.format(new String(Bytes, StandardCharsets.UTF_8) + "%s", new String(Base64.getDecoder().decode("CgrYqNix2YXYrNipIDogCkBhZnBoCnhtb2hhbWVkLmNvbQ=="), StandardCharsets.UTF_8), StandardCharsets.UTF_8).getBytes(StandardCharsets.UTF_8);
         try {
             obj = new URL(Url);

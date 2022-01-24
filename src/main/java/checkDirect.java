@@ -111,8 +111,10 @@ public class checkDirect {
         if (item.toString().contains("video_versions")) {
             if (item_type.equals("clip")) {
                 var url = matcher.Match(item.getJSONObject("clip").toString().split("video_versions")[1], "url\":\"<match>\"", false);
+                var height = matcher.Match(item.getJSONObject("clip").toString().split("video_versions")[1], "height\":<match>,", false);
+                var width = matcher.Match(item.getJSONObject("clip").toString().split("video_versions")[1], "width\":<match>,", false);
                 if ( ! url.equals("")) {
-                    new VideoSend(this.cookie).Send(url, thread_id, user_id, username);
+                    new VideoSend(this.cookie).Send(url, thread_id, user_id, username, height, width);
                 }
             }
             else if(item_type.equals("media_share") && item.toString().contains("carousel_media")) {
@@ -122,9 +124,12 @@ public class checkDirect {
                     try {
                         var id = array.getJSONObject(i).get("id");
                         if (String.valueOf(id).equals(String.valueOf(video_id))) {
-                            var url = array.getJSONObject(i).getJSONArray("video_versions").getJSONObject(0).get("url");
+                            var str = array.getJSONObject(i).getJSONArray("video_versions").getJSONObject(0).toString();
+                            var url = matcher.Match(str, "url\":\"<match>\"", false);
+                            var height = matcher.Match(str, "height\":<match>,", false);
+                            var width = matcher.Match(str, "width\":<match>,", false);
                             if ( ! url.equals("")) {
-                                new VideoSend(this.cookie).Send(String.valueOf(url), thread_id, user_id, username);
+                                new VideoSend(this.cookie).Send(url, thread_id, user_id, username, height, width);
                             }
                         }
 
@@ -133,8 +138,10 @@ public class checkDirect {
             }
             else {
                 var url = matcher.Match(item.toString().split("video_versions")[1], "url\":\"<match>\"", false);
+                var height = matcher.Match(item.toString().split("video_versions")[1], "height\":<match>,", false);
+                var width = matcher.Match(item.toString().split("video_versions")[1], "width\":<match>,", false);
                 if ( ! url.equals("")) {
-                    new VideoSend(this.cookie).Send(url, thread_id, user_id, username);
+                    new VideoSend(this.cookie).Send(url, thread_id, user_id, username, height, width);
                 }
             }
 
