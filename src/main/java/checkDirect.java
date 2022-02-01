@@ -1,28 +1,19 @@
-import okhttp3.Call;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import org.json.*;
 import java.io.File;
 import java.io.FileWriter;
-import java.net.URLDecoder;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import javax.swing.JOptionPane;
-import java.util.Random;
 
 public class checkDirect {
     private String cookie;
     private MohamedMatcher matcher;
-    private Random ran;
+    private final int TOTAL_STORIES_PER_REQUEST = 2;
+
 
     protected checkDirect(String cookie) {
         this.cookie = cookie;
         matcher = new MohamedMatcher();
-        this.ran = new Random();
         Runnable newThread = () -> {
             while (true) {
                 
@@ -42,18 +33,15 @@ public class checkDirect {
         new Thread(newThread).start();
     }
 
-    public void mainSystem() throws Exception{
-        OkHttpClient client = new OkHttpClient();
-        Request request = new Request.Builder()
-                .url("https://i.instagram.com/api/v1/direct_v2/inbox/?visual_message_return_type=unseen&thread_message_limit=1&use_unified_inbox=true")
-                .header("User-Agent", "Instagram 177.0.0.30.119 Android (25/7.1.2; 191dpi; 576x1024; Asus; ASUS_Z01QD; ASUS_Z01QD; intel; en_US; 276028020)")
-                .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
-                .header("Accept-Language", "en-US")
-                .header("Cookie", this.cookie)
-                .build();
-        Call call = client.newCall(request);
-        var Response = call.execute().body().string();
+    public void mainSystem() throws Exception {
+        Requests client = new Requests();
+        client.AddHeader("User-Agent", "Instagram 177.0.0.30.119 Android (25/7.1.2; 191dpi; 576x1024; Asus; ASUS_Z01QD; ASUS_Z01QD; intel; en_US; 276028020)");
+        client.AddHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+        client.AddHeader("Accept-Language", "en-US");
+        client.AddHeader("Cookie", this.cookie);
+        var Response = client.MakeGetRequest("https://i.instagram.com/api/v1/direct_v2/inbox/?visual_message_return_type=unseen&thread_message_limit=10&use_unified_inbox=true");
         Response = Response.replace("\": ", "\":");
+
         try{
             FileWriter writer = new FileWriter(new File("response.txt"), false);
             writer.write(Response);
@@ -71,34 +59,47 @@ public class checkDirect {
             }
             JSONArray threads = obj.getJSONObject("inbox").getJSONArray("threads");
             for (int i = 0; i < threads.length(); i++) {
+                int counter = 0;
+                var before = "";
                 try {
                     var thread = threads.getJSONObject(i);
                     var thread_id = thread.getString("thread_id");
                     var username = thread.getJSONObject("inviter").getString("username");
                     var user_id = String.valueOf(thread.getJSONObject("inviter").get("pk"));
-                    var item = thread.getJSONArray("items").getJSONObject(0);
-                    var item_type = item.getString("item_type");
-                    if (item_type.equals("clip") || item_type.equals("media_share") || item_type.equals("felix_share") ) {
-                        normalVideoWork(item, item_type, user_id, username, thread_id);
-                    }
-                    else if (item_type.equals("story_share")) {
-                        storyWork(item, item_type, user_id, username, thread_id);
-                    }
-                    else if (item_type.equals("link") || item_type.equals("text")) {
-                        var text = matcher.Match(item.toString(), "\"text\":\"<match>\"", false);
-                        links_and_textWork(text, user_id, username, thread_id);
-                    }
-                    else if (item_type.equals("profile")) {
-                        System.out.println(item_type);
+                    var items = thread.getJSONArray("items");
+                    for (int j = 0; j < this.TOTAL_STORIES_PER_REQUEST; j++) {
+                        try {
+                            var item = items.getJSONObject(j);
+                            var item_type = item.getString("item_type");
+                            if ( item.toString().contains("\"is_sent_by_viewer\":true") )
+                                break;
 
-                        JSONObject profile = item.getJSONObject("profile");
-                        profileWork(profile, user_id, username, thread_id);
+                            if (( item_type.equals("clip") || item_type.equals("media_share") || item_type.equals("felix_share") ) && counter < 1) {
+                                normalVideoWork(item, item_type, user_id, username, thread_id);
+                            }
+                            else if (( item_type.equals("story_share") && counter == 0) || ( item_type.equals("story_share") && before.equals("story"))) {
+                                storyWork(item, item_type, user_id, username, thread_id);
+                                before = "story";
+                            }
+                            else if (( item_type.equals("link") || item_type.equals("text") ) && counter < 1) {
+                                var text = matcher.Match(item.toString(), "\"text\":\"<match>\"", false);
+                                links_and_textWork(text, user_id, username, thread_id);
+                            }
+                            else if (item_type.equals("profile") && counter < 1) {
+                                System.out.println(item_type);
+    
+                                JSONObject profile = item.getJSONObject("profile");
+                                profileWork(profile, user_id, username, thread_id);
+                            }   
+                        } catch (Exception newException) {
+                            //TODO: handle exception
+                        }
+                        counter += 1;
                     }
                 }
                 catch (Exception e) {
-                    e.printStackTrace();
+                    // e.printStackTrace();
                 }
-
 
             }
         }

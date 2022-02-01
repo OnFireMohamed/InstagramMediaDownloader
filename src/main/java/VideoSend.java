@@ -6,7 +6,7 @@ import java.util.UUID;
 public class VideoSend {
     private final String Cookie, _uid;
     private String url, userid;
-    private String height = "1280", width = "720";
+    private String height = "540", width = "540";
 
     VideoSend(String Cookie){
         this._uid = new MohamedMatcher().GenerateRandom("46231100833".length(), "0987654321");
@@ -32,24 +32,23 @@ public class VideoSend {
                 MainClass.largeVideosWork(url, userid);
             }
 
-
         }catch (Exception f) {
-
+            f.printStackTrace();
         }
     }
     void Send(String url, String threadid, String userid, String Username, String height, String width){
         this.url = url;
         this.userid = userid;
-        if ( height.length() > 1 ) {
-            this.height = height;
-        }
+        // if ( height.length() > 1 ) {
+        //     this.height = height;
+        // }
         
-        if ( width.length() > 1 ) {
-            this.width = width;
-        }
+        // if ( width.length() > 1 ) {
+        //     this.width = width;
+        // }
         try {
-            this.height = this.height.replace("}", "");
-            this.width = this.width.replace("}", "");
+            // this.height = this.height.replace("}", "");
+            // this.width = this.width.replace("}", "");
             var time = "1619" + new MohamedMatcher().GenerateRandom(12, "0987654321");
             var uuid = UUID.randomUUID().toString();
             InputStream in = new URL(url).openStream();
@@ -64,7 +63,6 @@ public class VideoSend {
             else {
                 MainClass.largeVideosWork(url, userid);
             }
-
 
         }catch (Exception f) {
 
@@ -84,6 +82,7 @@ public class VideoSend {
         client.AddHeader("X-FB-HTTP-Engine", "Liger");
 
         String Response = client.MakeGetRequest("https://i.instagram.com/rupload_igvideo/" + uuid);
+        System.out.print(Response + " | ");
     }
 
 
@@ -106,6 +105,8 @@ public class VideoSend {
         client.AddHeader("X-FB-HTTP-Engine", "Liger");
 
         String Response = client.MakePostRequest("https://i.instagram.com/rupload_igvideo/" + uuid, videoBytes);
+        System.out.print(Response + " | ");
+
 
     }
 
@@ -122,6 +123,8 @@ public class VideoSend {
         client.AddHeader("Content-Length", String.valueOf(postdata.getBytes().length));
 
         String Response = client.MakePostRequest("https://i.instagram.com/api/v1/media/upload_finish/?video=1", postdata);
+        System.out.print(Response + "\n");
+
     }
 
     private boolean SendVideo(String threadid,  String time){

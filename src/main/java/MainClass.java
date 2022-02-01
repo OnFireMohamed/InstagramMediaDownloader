@@ -1,4 +1,3 @@
-import java.io.FileWriter;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -11,7 +10,7 @@ public class MainClass {
     static MohamedMatcher matcher;
     static Random ran;
     static int counter = 0;
-    static String version = "v6";
+    static String version = "v7";
     public static void main(String[] args) throws Exception{
         
         check();
@@ -27,10 +26,14 @@ public class MainClass {
             checkDirect cd = new checkDirect(logger.ApiCookie);
             System.out.println("[ + ] Logged In");
             while (true){
-                cd.mainSystem();
-                counter += 1;
-                System.out.println("direct has been checked now for " + counter);
-                try{Thread.sleep(30000);}catch (Exception e){}
+                try {
+                    cd.mainSystem();
+                    counter += 1;
+                    System.out.println("direct has been checked now for " + counter);
+                    try{Thread.sleep(30000);}catch (Exception newException){}   
+                } catch (Exception e) {
+                    //TODO: handle exception
+                }
             }
         }
         else{
