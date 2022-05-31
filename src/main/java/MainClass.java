@@ -1,8 +1,11 @@
+import java.awt.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import javax.swing.JOptionPane;
+
+import com.liferay.portal.kernel.servlet.URLEncoder;
 
 public class MainClass {
     static Scanner scanner;
@@ -10,7 +13,7 @@ public class MainClass {
     static MohamedMatcher matcher;
     static Random ran;
     static int counter = 0;
-    static String version = "v8";
+    static String version = "v9";
 
     public static void main(String[] args) throws Exception {
 
@@ -51,6 +54,13 @@ public class MainClass {
             JOptionPane.showMessageDialog(null,
                     "New Version !.\nDownload it from github.com/OnFireMohamed/InstagramMediaDownloader", "By @afph",
                     JOptionPane.ERROR_MESSAGE);
+            try {
+                Desktop.getDesktop().browse(new URL("https://github.com/OnFireMohamed/InstagramMediaDownloader").toURI());
+            }
+            catch (Exception e) {
+
+            }
+
             System.exit(0);
         }
     }
@@ -114,10 +124,10 @@ public class MainClass {
 
     public static void largeVideosWork(String url, String user_id) {
         try {
-
+            prepareSending(user_id);
             new Thread(() -> {
-                SendMessage(user_id, "Wait until I finish video download url preparation..");
                 try {
+                    System.out.println(url);
                     HttpPostMultipart multipart = new HttpPostMultipart("https://api.anonfiles.com/upload", "utf-8");
                     multipart.addFilePart("file", new URL(url).openStream().readAllBytes());
                     String val = multipart.send();
@@ -125,16 +135,42 @@ public class MainClass {
                     if (val.contains("\"status\":true")) {
                         var download_url = "https://mohamed-node-apis.herokuapp.com/api/anon-redirect/?url="
                                 + new MohamedMatcher().Match(val, "full\":\"<match>\"", false);
-                        var text = "The video is more than a minute long, So you can download it from this url : \n\n"
-                                + download_url
-                                + "\n\n Notice : open the url from safari or another browser - Not Instagram Browser -";
-                        SendMessage(user_id, text);
+                        sendURL(download_url, user_id);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
 
             }).start();
+        } catch (Exception e) {
+
+        }
+
+    }
+
+    public static void prepareSending(String user_id) {
+        SendMessage(user_id, "Wait until I finish video download url preparation..");
+    }
+
+    public static void sendURL(String URL, String user_id) {
+        try {
+            URL = URL.split("\\?")[0] + java.net.URLEncoder.encode(URL.split("\\?")[1], StandardCharsets.UTF_8);
+            var text = "The video is more than a minute long, So you can download it from this url : \n\n"
+                    + URL
+                    + "\n\n Notice : open the url from safari or another browser - Not Instagram Browser -";
+            SendMessage(user_id, text);
+        } catch (Exception e) {
+
+        }
+
+    }
+
+    public static void sendURLMode1(String URL, String user_id) {
+        try {
+            URL = URL.split("\\?")[0] + java.net.URLEncoder.encode(URL.split("\\?")[1], StandardCharsets.UTF_8);
+            var text = "The video is more than a minute long, So you can download it from this url : \n\n";
+            SendMessage(user_id, text);
+            SendMessage(user_id, URL);
         } catch (Exception e) {
 
         }

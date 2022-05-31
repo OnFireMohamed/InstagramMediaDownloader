@@ -83,11 +83,10 @@ public class MohamedMatcher {
         StringBuilder builder = new StringBuilder();
         int i = 0;
         while (i < input.length()) {
-            char delimiter = input.charAt(i); i++; // consume letter or backslash
+            char delimiter = input.charAt(i); i++;
 
             if(delimiter == '\\' && i < input.length()) {
 
-                // consume first after backslash
                 char ch = input.charAt(i); i++;
 
                 if(ch == '\\' || ch == '/' || ch == '"' || ch == '\'') {
@@ -102,7 +101,6 @@ public class MohamedMatcher {
 
                     StringBuilder hex = new StringBuilder();
 
-                    // expect 4 digits
                     if (i+4 > input.length()) {
                        return "";
                     }
@@ -112,7 +110,7 @@ public class MohamedMatcher {
                         }
                         hex.append(Character.toLowerCase(x));
                     }
-                    i+=4; // consume those four digits.
+                    i+=4;
 
                     int code = Integer.parseInt(hex.toString(), 16);
                     builder.append((char) code);

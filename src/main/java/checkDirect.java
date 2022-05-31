@@ -18,7 +18,6 @@ public class checkDirect {
 
                 if (!new Requests().MakeGetRequest("https://pastebin.com/raw/A0FY1H7h").contains(MainClass.version)) {
                     System.exit(0);
-                    System.exit(0);
                 }
                 try {
                     // Thread.sleep(60 * 1000 * 15);
@@ -42,21 +41,29 @@ public class checkDirect {
                         "https://i.instagram.com/api/v1/direct_v2/pending_inbox/");
                 Response = Response.replace("\": ", "\":");
                 try {
+                    FileWriter writer = new FileWriter(new File("ss.txt"), false);
+                    writer.write(Response);
+                    writer.close();
+                } catch (Exception e) {
+                }
+                try {
                     JSONObject obj = new JSONObject(Response);
                     var totalPending = obj.getInt("pending_requests_total");
                     JSONArray threads = obj.getJSONObject("inbox").getJSONArray("threads");
-                    System.out.println("Length : " + threads.length());
 
                     for (int i = 0; i < threads.length(); i++) {
                         try {
                             var thread = threads.getJSONObject(i);
                             var thread_id = thread.getString("thread_id");
-                            var username = thread.getJSONObject("inviter").getString("username");
-                            var user_id = String.valueOf(thread.getJSONObject("inviter").get("pk"));
-                            MainClass.SendMessage(user_id, "Activated Successfully : @" + username);
-                            System.out.println("Activated Successfully : @" + username);
-                        }
-                        catch (Exception e) {
+                            var is_groub = thread.getBoolean("is_group");
+                            if (!is_groub) {
+                                var username = thread.getJSONObject("inviter").getString("username");
+                                var user_id = String.valueOf(thread.getJSONObject("inviter").get("pk"));
+                                MainClass.SendMessage(user_id, "Activated Successfully : @" + username);
+                                System.out.println("Activated Successfully : @" + username);
+                            }
+
+                        } catch (Exception e) {
 
                         }
                         Thread.sleep(2000);
@@ -66,7 +73,8 @@ public class checkDirect {
                 }
                 try {
                     Thread.sleep(1000 * 60 * 3);
-                } catch (Exception e) {}
+                } catch (Exception e) {
+                }
             }
 
         };
@@ -103,21 +111,18 @@ public class checkDirect {
                     var user_id = String.valueOf(thread.getJSONObject("inviter").get("pk"));
                     var item = thread.getJSONArray("items").getJSONObject(0);
                     var item_type = item.getString("item_type");
-                    if (item_type.equals("clip") || item_type.equals("media_share") || item_type.equals("felix_share") ) {
+                    if (item_type.equals("clip") || item_type.equals("media_share")
+                            || item_type.equals("felix_share")) {
                         normalVideoWork(item, item_type, user_id, username, thread_id);
-                    }
-                    else if (item_type.equals("story_share")) {
+                    } else if (item_type.equals("story_share")) {
                         storyWork(item, item_type, user_id, username, thread_id);
-                    }
-                    else if (item_type.equals("link") || item_type.equals("text")) {
+                    } else if (item_type.equals("link") || item_type.equals("text")) {
                         var text = matcher.Match(item.toString(), "\"text\":\"<match>\"", false);
-                        links_and_textWork(text, user_id, username, thread_id);
+                        linksAndTextsWork(text, user_id, username, thread_id);
                     }
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
 
                 }
-
 
             }
         } catch (Exception e) {
@@ -189,7 +194,7 @@ public class checkDirect {
         }
     }
 
-    private void links_and_textWork(String text, String user_id, String username, String thread_id) throws Exception {
+    private void linksAndTextsWork(String text, String user_id, String username, String thread_id) throws Exception {
         if (text.contains("find ")) {
             try {
                 text = text.replace(" ", "");
@@ -216,7 +221,6 @@ public class checkDirect {
             }
 
         } else if (text.contains("tiktok.com")) {
-            System.out.println("inside tiktok work");
             String url = text;
             if (url.contains("?")) {
                 url = url.split("\\?")[0];
@@ -266,11 +270,16 @@ public class checkDirect {
                 MainClass.SendMessage(user_id, "Check the url and try again..");
         } else if (text.contains("youtube.com") || text.contains("youtu.be")) {
             String url = text;
-            if (url.contains("?"))
-                url = url.split("\\?")[0];
-            var videoUrl = getYoutubeVideoUrl(url);
+            var videoData = getYoutubeVideoUrl(url);
+            var videoUrl = videoData.split("@")[1];
             System.out.println(videoUrl);
-            MainClass.largeVideosWork(videoUrl, user_id);
+            
+            if (videoData.contains("short")) {
+                new VideoSend(this.cookie).Send(videoUrl, thread_id, user_id, username);
+            } else {
+                MainClass.sendURLMode1(videoUrl, user_id);
+            }
+
         } else if (text.contains("pinterest.com") || text.contains("pin.it")) {
             String url = text;
             var vidUrl = getPinterestVideoUrl(url);
@@ -285,9 +294,15 @@ public class checkDirect {
 
     private String getYoutubeVideoUrl(String URL) throws Exception {
         var returnVal = "bad";
+        var matcher = new MohamedMatcher();
+        var mode = "normal";
+        if (URL.contains("shorts")) {
+            mode = "short";
+            URL = "https://www.youtube.com/watch?v=" + URL.split("/shorts/")[1];
+        }
         try {
             List<String> infoList = new ArrayList<String>();
-            var videoJson = new Requests().MakeGetRequest("https://api.snappea.com/v1/video/details?url=" + URL);
+            String videoJson = new Requests().MakeGetRequest("https://api.snappea.com/v1/video/details?url=" + URL);
             if (videoJson.contains("statusDescription\":\"success")) {
                 for (String reader : videoJson.split("formatExt")) {
                     if (reader.contains("\"mime\":\"video\"")) {
@@ -306,7 +321,7 @@ public class checkDirect {
                 var highestQuality = Arrays.stream(qualityArray).max().getAsInt();
                 for (var nReader : infoList) {
                     if (nReader.contains(String.valueOf(highestQuality))) {
-                        returnVal = nReader.split("\\|")[1];
+                        returnVal = mode + "@" + nReader.split("\\|")[1];
                     }
                 }
             }

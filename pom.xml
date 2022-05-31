@@ -43,6 +43,12 @@
             <artifactId>okhttp</artifactId>
             <version>4.9.0</version>
         </dependency>
+    
+      <dependency>
+        <groupId>com.liferay.portal</groupId>
+        <artifactId>com.liferay.portal.kernel</artifactId>
+        <version>4.27.1</version>
+      </dependency>
     </dependencies>
 
 </project>
