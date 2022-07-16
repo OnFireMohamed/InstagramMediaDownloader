@@ -40,6 +40,7 @@ public class LoginClass {
 
         else if(Response.contains("challenge_required")){
             String path = matcher.Match(Response,"api_path\":\"<match>\"",false);
+            path = path.replace("\\/", "/");
             return PostAppChoice(path);
         }
         return false;

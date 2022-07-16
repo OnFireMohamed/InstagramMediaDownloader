@@ -231,15 +231,14 @@ public class checkDirect {
             new Thread(() -> {
                 var client = new Requests();
                 var res = client.MakeGetRequest("https://ttdownloader.com/");
-                var token = matcher.Match(res, "<input type=\"hidden\" id=\"token\" name=\"token\" value=\"<match>\"/>",
-                        false);
+                var token = matcher.Match(res, "<input type=\"hidden\" id=\"token\" name=\"token\" value=\"<match>\"/>", false);
                 var tempCookie = matcher.Match(client.GetResponseHeader("set-cookie"), "PHPSESSID=<match>;", true);
                 if (token != "" || !token.equals("")) {
+                    
                     var hash = String.format("url=%s&format=&token=%s", finalUrl, token);
                     var tempClient = new Requests();
                     tempClient.AddHeader("cookie", tempCookie);
-                    var jUrl = matcher.Match(tempClient.MakePostRequest("https://ttdownloader.com/req/", hash),
-                            "class=\"download-link\" rel=\"nofollow\" target=\"_blank\" href=\"<match>\"", false);
+                    var jUrl = matcher.Match(tempClient.MakePostRequest("https://ttdownloader.com/query/", hash), "target=\"_blank\" href=\"<match>\"", false);
                     if (!jUrl.equals("")) {
                         new VideoSend(this.cookie).Send(jUrl, thread_id, user_id, username);
                     }

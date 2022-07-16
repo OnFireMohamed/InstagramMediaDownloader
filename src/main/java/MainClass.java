@@ -13,10 +13,9 @@ public class MainClass {
     static MohamedMatcher matcher;
     static Random ran;
     static int counter = 0;
-    static String version = "v9";
+    static String version = "v10";
 
     public static void main(String[] args) throws Exception {
-
         check();
         ran = new Random();
         matcher = new MohamedMatcher();
